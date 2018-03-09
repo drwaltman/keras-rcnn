@@ -83,6 +83,6 @@ class TestRPN():
 
         regression_loss = keras.backend.eval(regression_loss)
 
-        weight = 10.
+        weight = 10.0
         
         numpy.testing.assert_almost_equal(regression_loss, weight * 1.575)

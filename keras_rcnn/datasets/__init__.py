@@ -12,26 +12,37 @@ def load_data(name):
         origin=origin,
         untar=True
     )
-    
-    filename = os.path.join(pathname, "training.json")
 
-    training = get_file_data(filename, pathname)
+    images_pathname = os.path.join(pathname, "images")
 
-    filename = os.path.join(pathname, "test.json")
+    masks_pathname = os.path.join(pathname, "masks")
 
-    test = get_file_data(filename, pathname)
+    if not os.path.exists(masks_pathname):
+        masks_pathname = None
+
+    training_pathname = os.path.join(pathname, "training.json")
+
+    training = get_file_data(training_pathname, images_pathname, masks_pathname)
+
+    test_pathname = os.path.join(pathname, "test.json")
+
+    test = get_file_data(test_pathname, images_pathname, masks_pathname)
 
     return training, test
 
-def get_file_data(filename, image_path):
-    if os.path.exists(filename):
-        with open(filename) as data:
-            partition = json.load(data)
-    else:
-        partition = []
-        
-    for dictionary in partition:
 
-        dictionary["image"]["pathname"] = image_path + dictionary["image"]["pathname"]
-    
-    return partition
+def get_file_data(json_pathname, images_pathname, masks_pathname=None):
+    if os.path.exists(json_pathname):
+        with open(json_pathname) as data:
+            dictionaries = json.load(data)
+    else:
+        dictionaries = []
+
+    for dictionary in dictionaries:
+        dictionary["image"]["pathname"] = os.path.join(images_pathname, dictionary["image"]["pathname"])
+
+        if masks_pathname:
+            for index, instance in enumerate(dictionary["objects"]):
+                dictionary["objects"][index]["mask"]["pathname"] = os.path.join(masks_pathname, dictionary["objects"][index]["mask"]["pathname"])
+
+    return dictionaries
